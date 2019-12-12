@@ -1,31 +1,27 @@
-const express = require('express');
+const router = require('express').Router();
 const passport = require('passport');
 const querystring = require('querystring');
-const util = require('util');
 const url = require('url');
-
-const router = express.Router();
+const util = require('util');
 
 router.get(
-	'/login',
-	passport.authenticate('auth0', {
-		scope: 'openid email profile'
-	}),
-	(req, res) => {
-		res.redirect('/');
-	}
+    '/login',
+    passport.authenticate('auth0', {
+        scope: 'openid email profile',
+        successReturnToOrRedirect: '/',
+        failureRedirect: '/login'
+    })
 );
 
 router.get(
-	'/callback',
-	passport.authenticate('auth0', { failureRedirect: '/login' }),
-	(req, res) => {
-		const { returnTo } = req.session;
-		delete req.session.returnTo;
-		console.log(returnTo);
+    '/callback',
+    passport.authenticate('auth0', { failureRedirect: '/login' }),
+    (req, res) => {
+        const { returnTo } = req.session;
+        delete req.session.returnTo;
 
-		res.redirect(returnTo || '/');
-	}
+        res.redirect(returnTo || '/');
+    }
 );
 
 /* router.get('/callback', (req, res, next) => {
@@ -45,23 +41,24 @@ router.get(
 }); */
 
 router.get('/logout', (req, res) => {
-	req.logout();
+    req.logout();
 
-	let returnTo = req.protocol + '://' + req.hostname;
-	const port = req.connection.localPort;
+    let returnTo = req.protocol + '://' + req.hostname;
+    const port = req.connection.localPort;
 
-	if (port !== undefined && port !== 80 && port !== 443) returnTo += ':' + port;
+    if (port !== undefined && port !== 80 && port !== 443)
+        returnTo += ':' + port;
 
-	const logoutURL = new url.URL(
-		util.format('https://%s/v2/logout', process.env.AUTH0_DOMAIN)
-	);
-	const searchString = querystring.stringify({
-		client_id: process.env.AUTH0_CLIENT_ID,
-		returnTo: returnTo
-	});
-	logoutURL.search = searchString;
+    const logoutURL = new url.URL(
+        util.format('https://%s/v2/logout', process.env.AUTH0_DOMAIN)
+    );
+    const searchString = querystring.stringify({
+        client_id: process.env.AUTH0_CLIENT_ID,
+        returnTo: returnTo
+    });
+    logoutURL.search = searchString;
 
-	res.redirect(logoutURL.href);
+    res.redirect(logoutURL.href);
 });
 
 module.exports = router;
