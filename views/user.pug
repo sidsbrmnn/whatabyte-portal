@@ -2,12 +2,12 @@ extends layout
 
 block layout-content
     .view.user-view
-        h1.banner Howdy, #{userProfile.nickname}!
+        h1.banner Howdy, #{user.displayName}!
         .message
             .title
                 h3 Making Us the Best
                 h1 Teammate Profile
-            pre.details=JSON.stringify(userProfile, null, 2)
+            pre.details=JSON.stringify(user, null, 2)
         .nav-buttons
             a(href="/logout")
                 .nav-button Log out
